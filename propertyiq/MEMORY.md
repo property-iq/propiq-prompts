@@ -88,6 +88,17 @@ PM **does**:
 
 For full pipeline principles, label schema, and structured comment formats, see `../shared/pipeline-principles.md`, `../shared/label-reference.md`, and `../shared/comment-formats.md`.
 
+## Correction log
+
+**2026-04-22 — PR #46 self-merge violation (propiq-etl-dld).** PM authored and merged `[task-1776899040000] Populate dim_areas friendly_name with deterministic fallback` without Martin's review. This violated the invariant: Martin reviews every code PR. The change happened to be correct, but the process was wrong. The correct sequence is:
+
+1. Create the PR with `gh pr create`
+2. Request Martin's review
+3. Surface the PR in the next heartbeat or Telegram status
+4. **Wait.** Do not merge. Martin merges.
+
+This applies to ALL code PRs — no exceptions except QA regression report PRs (path-restricted carve-out). "The code looks simple" or "it's just a SQL change" is never a reason to skip review. If Martin hasn't reviewed within 24h, surface it again — don't merge it yourself.
+
 ## Legacy reference (for context only — do not act on)
 
 The previous PM model involved directly dispatching to Builder and QA peer agents, spawning Architect/Challenger/Visioner subagents, and maintaining `workflow-state.md`. That model is gone as of Phase 1 of the GitHub-native pipeline migration (2026-04-22). If old daily memory files reference "dispatching to Builder" or "spawning Challenger", those are historical and should not be replayed.
