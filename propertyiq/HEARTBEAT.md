@@ -47,12 +47,58 @@ If any of these are elevated compared to the last heartbeat, mention in the stat
 
 **P4. Triage.** Based on what P1–P3 surfaced:
 
-- **Martin messaged with a build/decide/audit request** → file a GitHub Issue using the matching template (`.github/ISSUE_TEMPLATE/builder-task.md` for work, `audit-finding.md` for findings, `martin-direct.md` for decisions). Apply labels: `needs-refinement`, `from:martin`, a priority (default `p2` unless Martin specified), and epic if obvious. The Refinement Routine will pick it up.
+- **Martin messaged with a build/decide/audit request** → evaluate using the four-outcomes decision tree in SOUL.md. File a GitHub Issue using the matching template (`.github/ISSUE_TEMPLATE/builder-task.md` for work, `audit-finding.md` for findings, `martin-direct.md` for decisions). Apply the appropriate routing label (`route:pipeline`, `route:manual`, or `route:idea`), plus `from:martin`, a priority (default `p2` unless Martin specified), and epic if obvious. The Refinement Routine will pick up `route:pipeline` Issues.
 - **Martin messaged with a status question** → fetch board state (`curl /api/board`), format a concise answer, reply via Telegram.
 - **PR is waiting for Martin's review for >24h** → surface it to him with the PR URL. Don't nag more than once per day per PR.
 - **New GitHub comment on a PR** → if it's a `[BLOCKER]` or `[AGENT-REQUEST]` tagged by Routines, surface to Martin. If it's a discussion comment, do nothing.
 - **Drift/orphan/stale alert from /api/health** → surface to Martin with the count and which category.
 - **Nothing new** → reply with a status digest or stay silent if no signal has changed since last beat.
+
+## Monday grooming (09:00 DXB only)
+
+On Monday heartbeats only, surface two grooming lists to Martin before normal triage. Skip any list whose result set is empty (no noise when nothing's aged).
+
+### Ideas older than 90 days
+
+Query: `gh search issues --owner property-iq --state open --label "route:idea" --updated "<$(date -u -v-90d +%Y-%m-%d)"`
+
+If non-empty, post to Telegram:
+
+```
+Weekly ideas review — {N} idea(s) older than 90 days:
+
+- #{num} {title} (filed {days} days ago)
+- #{num} {title} (filed {days} days ago)
+
+Reply `close #N` / `promote #N` / `keep #N` for each:
+- `close`: close the Issue.
+- `promote`: relabel `route:idea` → `route:pipeline` (I apply the swap; Refinement Routine picks it up on next fire).
+- `keep`: touch `updated_at` so it drops off the list for another 90 days.
+
+No reply = no action (will surface again next week).
+```
+
+### Manual queue items older than 30 days with no PR
+
+Query: `gh search issues --owner property-iq --state open --label "route:manual" --updated "<$(date -u -v-30d +%Y-%m-%d)"` — filter client-side for no linked PR.
+
+If non-empty, post to Telegram:
+
+```
+Manual queue check — {N} item(s) older than 30 days with no PR:
+
+- #{num} {title} (filed {days} days ago)
+- #{num} {title} (filed {days} days ago)
+
+Reply `defer #N` / `drop #N` / `keep #N` for each:
+- `defer`: relabel `route:manual` → `route:idea` (I apply).
+- `drop`: close the Issue.
+- `keep`: touch `updated_at`; next review in 30 days.
+
+No reply = no action.
+```
+
+Groom messages are distinct from normal heartbeat status reports — both can happen in the same Monday beat, but groom comes first.
 
 ## Gate check (internal — not shown to Martin)
 
