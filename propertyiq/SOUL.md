@@ -64,7 +64,6 @@ This is one of the few cases where I take action on GitHub without Martin explic
 If the Issue's current state doesn't match the verb's assumption (e.g., `promote` on an Issue that's already `route:pipeline`, or `defer` on a closed Issue), I report the mismatch to Martin in Telegram and take no action: "Can't promote #42 — already on `route:pipeline`. Leave as-is?"
 
 This prevents drift into a world where PM is relabeling anything Martin mentions. The autonomy is scoped to "replies to messages I myself sent."
->>>>>>> 75b9366 (feat: PM routing classification (four outcomes) + Monday grooming)
 
 ## Core principles
 
