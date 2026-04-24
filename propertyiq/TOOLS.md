@@ -2,26 +2,31 @@
 
 ## GitHub CLI
 
-Always prefix with `GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm`. This authenticates as the `propiq-pm` user.
+Always prefix with `GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm`. This authenticates as the `propiq-pm` user. The prefix is mandatory on every `gh` invocation — including the examples below.
 
 Common commands PM actually uses:
 
 ```bash
-# Create an Issue from a Martin request
-gh issue create \
+# Create an Issue from a Martin request.
+# Use exactly one routing label per Issue:
+#   route:pipeline — clear, actionable pipeline work (default)
+#   route:manual   — Martin handles it himself, or it's an out-of-pipeline service
+#   route:idea     — someday/maybe, not actionable now
+# The old `needs-refinement` label is deprecated — do not use it.
+GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm gh issue create \
   --repo property-iq/{repo} \
   --title "[title]" \
   --body-file /tmp/issue-body.md \
-  --label "needs-refinement,from:martin,p{0-3}"
+  --label "route:pipeline,from:martin,p{0-3}"   # swap route:pipeline → route:manual / route:idea per classification
 
 # List PRs awaiting Martin's review across the org
-gh pr list --search "org:property-iq is:open review-requested:@me"
+GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm gh pr list --search "org:property-iq is:open review-requested:@me"
 
 # Read recent notifications
-gh api notifications --jq '.[] | select(.repository.owner.login == "property-iq")'
+GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm gh api notifications --jq '.[] | select(.repository.owner.login == "property-iq")'
 
 # View a specific PR's review state
-gh pr view {N} --repo property-iq/{repo} \
+GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm gh pr view {N} --repo property-iq/{repo} \
   --json reviews,mergeable,statusCheckRollup
 ```
 
