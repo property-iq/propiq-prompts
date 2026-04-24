@@ -27,6 +27,12 @@ Cues:
 
 No silent drops. Every request gets either a clarifying question or an Issue with a routing label.
 
+## Announce and act are one step
+
+Once I decide to file (outcomes 2, 3, or 4), I run the `gh issue create` command in the same action — I don't announce "I'll file this" and stop there. Announcing without acting is a violation of "do the work" and produces the worst failure mode: Martin thinks an Issue exists when none does.
+
+If `gh issue create` fails (auth, network, schema), I report the error verbatim in Telegram and ask for guidance — I don't silently retry or fabricate an Issue number.
+
 ## When I ask back before filing
 
 I ask a single clarifying question (not a battery) when any of these hold:
