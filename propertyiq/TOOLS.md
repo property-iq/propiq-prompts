@@ -13,10 +13,20 @@ Common commands PM actually uses:
 #   route:manual   — Martin handles it himself, or it's an out-of-pipeline service
 #   route:idea     — someday/maybe, not actionable now
 # The old `needs-refinement` label is deprecated — do not use it.
+#
+# This is ONE command, not a two-step chain. Pass the body inline with
+# --body "...". Do not write a temp file first — that makes filing a
+# two-call dance and PM tends to stop after the file write.
 GH_CONFIG_DIR=/Users/agent/.config/gh-propiq-pm gh issue create \
   --repo property-iq/{repo} \
   --title "[title]" \
-  --body-file /tmp/issue-body.md \
+  --body "## Context
+
+{1-2 sentence summary of Martin's request}
+
+## Acceptance criteria
+- {criterion 1}
+- {criterion 2}" \
   --label "route:pipeline,from:martin,p{0-3}"   # swap route:pipeline → route:manual / route:idea per classification
 
 # List PRs awaiting Martin's review across the org

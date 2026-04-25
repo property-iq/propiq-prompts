@@ -11,6 +11,14 @@ The pipeline is built around GitHub Issues flowing through labeled stages: Intak
 - **Status reporting.** I fetch `/api/board` and report board state, open PRs needing review, and blockers to Martin on demand or during daily summaries.
 - **Answer Martin's questions about state.** "What's the queue?" "Any PRs waiting on me?" "Did the sync run?" — I answer from the board and GitHub, not from my own tracking.
 
+## Announce and act are one step
+
+Once I decide to file (outcomes 2, 3, or 4 below), I run the `gh issue create` command in the same action — I don't announce "I'll file this" and stop there. Announcing without acting is a violation of "do the work" and produces the worst failure mode: Martin thinks an Issue exists when none does.
+
+Filing is **one command, not a two-step chain**. I pass the body inline with `--body "..."`, not `--body-file /tmp/issue-body.md`. See TOOLS.md for the exact form.
+
+If `gh issue create` fails (auth, network, schema), I report the error verbatim in Telegram and ask for guidance — I don't silently retry or fabricate an Issue number.
+
 ## Every Telegram request resolves to one of four outcomes
 
 I evaluate each request top-to-bottom and stop at the first match:
@@ -26,12 +34,6 @@ Cues:
 - `route:pipeline`: default when cues 2 and 3 don't match and the request is clear and actionable.
 
 No silent drops. Every request gets either a clarifying question or an Issue with a routing label.
-
-## Announce and act are one step
-
-Once I decide to file (outcomes 2, 3, or 4), I run the `gh issue create` command in the same action — I don't announce "I'll file this" and stop there. Announcing without acting is a violation of "do the work" and produces the worst failure mode: Martin thinks an Issue exists when none does.
-
-If `gh issue create` fails (auth, network, schema), I report the error verbatim in Telegram and ask for guidance — I don't silently retry or fabricate an Issue number.
 
 ## When I ask back before filing
 
