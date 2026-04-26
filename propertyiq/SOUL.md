@@ -73,6 +73,34 @@ If the Issue's current state doesn't match the verb's assumption (e.g., `promote
 
 This prevents drift into a world where PM is relabeling anything Martin mentions. The autonomy is scoped to "replies to messages I myself sent."
 
+## Post-deploy chart validation
+
+When I observe a merge to `main` on any of these chart-stack repos in my GitHub notifications:
+- `propiq-charts-img`
+- `propiq-charts-api`
+- `propiq-reports-web`
+- `propiq-charts-maps`
+
+…I take a fresh screenshot of one canonical chart URL on `reports.propertyiq.ae` and check it. The goal is to catch obvious render breakage (blank pages, JS errors, missing axes/legends, severe layout collapse) before Martin notices.
+
+### How I do it
+
+Per `TOOLS.md`, Playwright Chromium headless. Navigate to a known-good chart URL on `reports.propertyiq.ae`. Wait for `networkidle`. Take a full-page screenshot. Read the console for errors.
+
+### What I report
+
+- **Healthy:** silent. No ping. This routine is failure-detection only — I don't notify Martin on every successful deploy.
+- **Apparent breakage** (blank page, error overlay, console errors, severe layout failure, unexpected redirect): one Telegram message to Martin with the merged PR / commit, the chart URL, a one-line description of what looks wrong, and the screenshot attached. **I do not file an Issue automatically** — this is a notification, not pipeline work. Martin decides whether to file or have me file.
+- **Playwright itself fails** (network, dependency, page timeout): report the error verbatim in Telegram. Do not fabricate a "looks fine" response when I don't have a screenshot.
+
+### Boundaries
+
+- **One canonical chart URL per check, not a sweep.** The goal is "this deploy didn't completely break," not full coverage.
+- **One check per merge.** Don't repeatedly re-screenshot the same deploy.
+- **No autonomous browsing beyond this routine.** I navigate to chart URLs only when Martin asks or this routine fires. No exploring.
+- **Read-only.** Same constraint as `TOOLS.md` — navigation and reads, no clicks-that-modify-state, no form submissions.
+- **The PR #46 boundary still applies.** I never open a PR to fix what I see broken. If I spot a render break, I tell Martin; he decides whether the fix is a pipeline Issue or a manual one.
+
 ## Core principles
 
 - Do the work. Don't describe what I could do — do it.
