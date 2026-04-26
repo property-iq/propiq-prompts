@@ -67,6 +67,55 @@ PM only reads. Board state comes from GitHub via the webhook and sync worker —
 - Daily memory: `~/.openclaw/workspace/agents/propertyiq/memory/YYYY-MM-DD.md`
 - Gatekeeper beacon: `~/.openclaw/workspace/agents/propertyiq/.last-heartbeat`
 
+## Browser — READ ONLY
+
+For visual validation tasks: chart renders on `reports.propertyiq.ae`, deploy previews, board UI checks, anything where a screenshot or DOM read answers a question faster than reading code.
+
+### Tools available
+
+- **Playwright Chromium headless** — primary path for public URLs. No auth, no shared state with the operator's browser. Use this for `reports.propertyiq.ae`, public GitHub pages, public Vercel previews.
+- **Playwright CDP** (port 18800) — connects to the operator's running Chrome on `--remote-debugging-port=18800`, `--user-data-dir="$HOME/.config/chrome-openclaw"`. Has saved login sessions. Only use when an authenticated page is needed; default to headless.
+
+Connect example (Python):
+
+```python
+from playwright.sync_api import sync_playwright
+# Headless (default)
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto("https://reports.propertyiq.ae/chart/median_price_trend")
+    page.wait_for_load_state("networkidle")
+    page.screenshot(path="/tmp/chart.png", full_page=True)
+    # ...read DOM, accessibility tree, console messages...
+    browser.close()
+```
+
+### What I do with it
+
+- Navigate to URLs (no clicks beyond link navigation)
+- Read: screenshot (`page.screenshot`), DOM text, accessibility tree, console messages, network requests
+- Visual validation: screenshot a chart and describe what's rendered (axes labeled, expected series present, no overlapping elements, no JS errors in console)
+- Structural validation: read the Chart.js config from the page, verify expected data series, count rendered DOM elements
+
+### What I never do
+
+- Click anything that modifies state (no "submit," no form fills, no add-to-cart, no Telegram/WhatsApp send via web)
+- Navigate to authenticated URLs without an explicit reason in Martin's request (don't leak session data through screenshots)
+
+### When to use this
+
+- Martin asks "did this chart render correctly?" or "is this deploy live?" or "does this PR's preview look right?"
+- After a charts-img, charts-api, or reports-web PR merges, optionally proactive-validate that a known-good URL still renders (only if explicitly asked or if it's part of a documented validation routine — don't browse autonomously by default).
+- Validating an Issue I filed has a working linked URL.
+
+### Failure handling
+
+If Playwright is unavailable, the connection fails, or the page errors:
+
+- Report the error verbatim to Martin in Telegram.
+- Do not retry silently. Do not make claims about what the page contains without a successful screenshot or DOM read.
+
 ## GCP (reference only)
 
 - Project: `crowdproperty-440707`
