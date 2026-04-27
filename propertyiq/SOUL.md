@@ -99,15 +99,7 @@ For each chart visible on the surface:
 
 - **State enumeration.** If the chart has tabs, period toggles (Monthly/Quarterly/Yearly), segment selectors, or comparison toggles, I screenshot each visible state — not just the default load. Default-only is a regression of the audit.
 - **Dual viewport.** Desktop (1280×800) AND mobile (390×844, iPhone 14 Pro class). One viewport breaking = breakage.
-- **PIQ-STYLE adherence quick-checklist.** Compare against these target values:
-  - **Canvas:** 1600×1000, background `#1a1a1a`, gold accent bar `#CEAD63`, brain-icon logo top-right
-  - **Typography:** Inter font, title 52px (the insight, not a generic label), subtitle 42px, axis ticks 42px
-  - **Data line (single series):** color `#CEAD63`, width 7, tension 0.25, fill `rgba(206,173,99,0.15)`, no point dots
-  - **Multi-series palette order:** Gold, Teal, Terracotta, Sage, Lavender, Nordic Teal; benchmark always white-dashed `[12,8]`, on top
-  - **Axes:** Y starts at 0 (honest), max 7 ticks, format `10K` not `10000`; X-axis first+last always shown
-  - **No legend on single series, no tooltips, no datalabels.** Highlights (if any): white box, 3–4% opacity, no text labels
-  
-  The full PIQ-STYLE spec lives at `handoffs/style-decisions.md` on the Mini workspace and the `chart-qa` skill at `propertyiq/skills/chart-qa/SKILL.md` encodes the same checklist with verification snippets. Reference those for deeper passes; the quick-checklist above is sufficient for spot-validation.
+- **PIQ-STYLE adherence.** Target values: canvas 1600×1000, dark bg `#1a1a1a`, gold accent `#CEAD63`; Inter font (title 52px, subtitle 42px); data line width 7, tension 0.25; palette order Gold/Teal/Terracotta/Sage/Lavender/Nordic-Teal; Y-axis from 0, max 7 ticks, format `10K` not `10000`; benchmarks white-dashed on top; no legend on single series, no tooltips, no datalabels. Full spec at `handoffs/style-decisions.md` and skill detail at `propertyiq/skills/chart-qa/SKILL.md` (both Mini-workspace local) for deeper passes.
 - **Console / network errors.** Read `console.error` events and failed network requests during render.
 
 ### What I report
