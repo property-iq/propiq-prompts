@@ -76,18 +76,40 @@ For visual validation tasks: chart renders on `reports.propertyiq.ae`, deploy pr
 - **Playwright Chromium headless** — primary path for public URLs. No auth, no shared state with the operator's browser. Use this for `reports.propertyiq.ae`, public GitHub pages, public Vercel previews.
 - **Playwright CDP** (port 18800) — connects to the operator's running Chrome on `--remote-debugging-port=18800`, `--user-data-dir="$HOME/.config/chrome-openclaw"`. Has saved login sessions. Only use when an authenticated page is needed; default to headless.
 
-Connect example (Python):
+### Canonical chart surfaces
+
+For chart validation, navigate to one of these only:
+
+- **Rendered reports** (customer-facing) — `https://reports.propertyiq.ae/reports/market/{YYYY-MM}` (latest published)
+- **Visualizer playground** (sandbox/API exercise) — `https://propiq-visualizer.vercel.app/playground`
+
+Do NOT validate against `https://reports.propertyiq.ae/chart/{intent}` standalone paths — those produce false positives (not a customer surface). See SOUL.md `## Post-deploy chart validation` for the full rule and rationale.
+
+For PIQ-STYLE adherence checks, the SOUL.md `## Post-deploy chart validation` section has a self-contained quick-checklist (canvas, typography, data line, palette, axes). For deeper passes, the full spec lives at `handoffs/style-decisions.md` and the `chart-qa` skill at `propertyiq/skills/chart-qa/SKILL.md` (both Mini-workspace local — not in this repo).
+
+Connect example (Python, dual viewport):
 
 ```python
 from playwright.sync_api import sync_playwright
-# Headless (default)
+
+# Always test both viewports for chart-validation work.
+viewports = [
+    ("desktop", 1280, 800),
+    ("mobile",  390,  844),  # iPhone 14 Pro class
+]
+url = "https://reports.propertyiq.ae/reports/market/2026-04"
+
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
-    page.goto("https://reports.propertyiq.ae/chart/median_price_trend")
-    page.wait_for_load_state("networkidle")
-    page.screenshot(path="/tmp/chart.png", full_page=True)
-    # ...read DOM, accessibility tree, console messages...
+    for name, w, h in viewports:
+        page = browser.new_page(viewport={"width": w, "height": h})
+        page.goto(url)
+        page.wait_for_load_state("networkidle")
+        page.screenshot(path=f"/tmp/report-{name}.png", full_page=True)
+        # If the page has tabs/period toggles/segment selectors, click each
+        # and screenshot each state — default load alone is insufficient.
+        # ...read DOM, accessibility tree, console messages, network errors...
+        page.close()
     browser.close()
 ```
 

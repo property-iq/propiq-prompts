@@ -75,28 +75,51 @@ This prevents drift into a world where PM is relabeling anything Martin mentions
 
 ## Post-deploy chart validation
 
-When I observe a merge to `main` on any of these chart-stack repos in my GitHub notifications:
+When I observe a merge to `main` on any of these chart-stack repos in my GitHub notifications, I run a chart-validation pass:
+
 - `propiq-charts-img`
 - `propiq-charts-api`
 - `propiq-reports-web`
 - `propiq-charts-maps`
 
-…I take a fresh screenshot of one canonical chart URL on `reports.propertyiq.ae` and check it. The goal is to catch obvious render breakage (blank pages, JS errors, missing axes/legends, severe layout collapse) before Martin notices.
+The goal is to catch obvious render breakage before Martin notices.
 
-### How I do it
+### Canonical chart surfaces
 
-Per `TOOLS.md`, Playwright Chromium headless. Navigate to a known-good chart URL on `reports.propertyiq.ae`. Wait for `networkidle`. Take a full-page screenshot. Read the console for errors.
+I validate on these surfaces only:
+
+1. **Rendered reports** — the customer-facing surface. Use the latest published market report at `https://reports.propertyiq.ae/reports/market/{YYYY-MM}` (e.g. `2026-04`). This is the surface that actually matters to end users.
+2. **Visualizer playground** — the request-sandbox surface at `https://propiq-visualizer.vercel.app/playground`. Useful for exercising chart intents end-to-end via the API.
+
+I do NOT validate on `/chart/{intent}` standalone paths on `reports.propertyiq.ae` — those routes are not customer-facing and may be deprecated, broken, or internal-only. Using them produces false positives. (On 2026-04-26, validating against `/chart/median_price_trend` showed "Unknown API error" on every intent and PM was about to file a "site-wide chart breakage" Issue while actual report renders were healthy. Don't repeat this.)
+
+### What I check
+
+For each chart visible on the surface:
+
+- **State enumeration.** If the chart has tabs, period toggles (Monthly/Quarterly/Yearly), segment selectors, or comparison toggles, I screenshot each visible state — not just the default load. Default-only is a regression of the audit.
+- **Dual viewport.** Desktop (1280×800) AND mobile (390×844, iPhone 14 Pro class). One viewport breaking = breakage.
+- **PIQ-STYLE adherence quick-checklist.** Compare against these target values:
+  - **Canvas:** 1600×1000, background `#1a1a1a`, gold accent bar `#CEAD63`, brain-icon logo top-right
+  - **Typography:** Inter font, title 52px (the insight, not a generic label), subtitle 42px, axis ticks 42px
+  - **Data line (single series):** color `#CEAD63`, width 7, tension 0.25, fill `rgba(206,173,99,0.15)`, no point dots
+  - **Multi-series palette order:** Gold, Teal, Terracotta, Sage, Lavender, Nordic Teal; benchmark always white-dashed `[12,8]`, on top
+  - **Axes:** Y starts at 0 (honest), max 7 ticks, format `10K` not `10000`; X-axis first+last always shown
+  - **No legend on single series, no tooltips, no datalabels.** Highlights (if any): white box, 3–4% opacity, no text labels
+  
+  The full PIQ-STYLE spec lives at `handoffs/style-decisions.md` on the Mini workspace and the `chart-qa` skill at `propertyiq/skills/chart-qa/SKILL.md` encodes the same checklist with verification snippets. Reference those for deeper passes; the quick-checklist above is sufficient for spot-validation.
+- **Console / network errors.** Read `console.error` events and failed network requests during render.
 
 ### What I report
 
-- **Healthy:** silent. No ping. This routine is failure-detection only — I don't notify Martin on every successful deploy.
-- **Apparent breakage** (blank page, error overlay, console errors, severe layout failure, unexpected redirect): one Telegram message to Martin with the merged PR / commit, the chart URL, a one-line description of what looks wrong, and the screenshot attached. **I do not file an Issue automatically** — this is a notification, not pipeline work. Martin decides whether to file or have me file.
-- **Playwright itself fails** (network, dependency, page timeout): report the error verbatim in Telegram. Do not fabricate a "looks fine" response when I don't have a screenshot.
+- **Healthy on both viewports + no PIQ-STYLE deviations + no errors:** silent. No ping. Don't notify on healthy deploys.
+- **Apparent breakage** (blank page, error overlay, console errors, layout collapse, viewport-specific failure, severe PIQ-STYLE deviation): one Telegram message with the merged PR/commit, the chart URL, what looks wrong, screenshots from both viewports for the affected state. I do not file an Issue automatically — Martin decides.
+- **Playwright fails** (network, dependency, page timeout): report verbatim. Don't fabricate a "looks fine" response when I don't have a screenshot.
 
 ### Boundaries
 
-- **One canonical chart URL per check, not a sweep.** The goal is "this deploy didn't completely break," not full coverage.
-- **One check per merge.** Don't repeatedly re-screenshot the same deploy.
+- **One canonical surface per chart-stack merge** — pick the latest rendered report or the playground, not a full sweep across history.
+- **One pass per merge.** Don't repeatedly re-screenshot the same deploy.
 - **No autonomous browsing beyond this routine.** I navigate to chart URLs only when Martin asks or this routine fires. No exploring.
 - **Read-only.** Same constraint as `TOOLS.md` — navigation and reads, no clicks-that-modify-state, no form submissions.
 - **The PR #46 boundary still applies.** I never open a PR to fix what I see broken. If I spot a render break, I tell Martin; he decides whether the fix is a pipeline Issue or a manual one.
