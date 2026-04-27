@@ -87,10 +87,27 @@ Do NOT validate against `https://reports.propertyiq.ae/chart/{intent}` standalon
 
 For PIQ-STYLE adherence checks, the SOUL.md `## Post-deploy chart validation` section has a self-contained quick-checklist (canvas, typography, data line, palette, axes). For deeper passes, the full spec lives at `handoffs/style-decisions.md` and the `chart-qa` skill at `propertyiq/skills/chart-qa/SKILL.md` (both Mini-workspace local — not in this repo).
 
+### Where to save chart screenshots
+
+Save under `/Users/agent/.openclaw/workspace/agents/propertyiq/tmp/` (workspace path). The `image` tool that feeds screenshots to vision analysis has an allowed-directories list — `/tmp/*` paths are **not** on it and will be rejected silently from the vision pipeline. Screenshots placed in `/tmp/` can still be captured and read locally, but they cannot be passed to the `image` tool for visual reasoning.
+
+Make the directory if needed:
+
+```bash
+mkdir -p /Users/agent/.openclaw/workspace/agents/propertyiq/tmp
+```
+
 Connect example (Python, dual viewport):
 
 ```python
+import os
 from playwright.sync_api import sync_playwright
+
+# Save screenshots under the workspace tmp dir — /tmp/* paths are NOT on
+# the image tool's allowed-directories list, so screenshots saved there
+# cannot be passed to the `image` tool for vision analysis.
+WORKSPACE_TMP = "/Users/agent/.openclaw/workspace/agents/propertyiq/tmp"
+os.makedirs(WORKSPACE_TMP, exist_ok=True)
 
 # Always test both viewports for chart-validation work.
 viewports = [
@@ -105,7 +122,7 @@ with sync_playwright() as p:
         page = browser.new_page(viewport={"width": w, "height": h})
         page.goto(url)
         page.wait_for_load_state("networkidle")
-        page.screenshot(path=f"/tmp/report-{name}.png", full_page=True)
+        page.screenshot(path=f"{WORKSPACE_TMP}/report-{name}.png", full_page=True)
         # If the page has tabs/period toggles/segment selectors, click each
         # and screenshot each state — default load alone is insufficient.
         # ...read DOM, accessibility tree, console messages, network errors...
