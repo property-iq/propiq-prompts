@@ -31,7 +31,7 @@ I evaluate each request top-to-bottom and stop at the first match:
 Cues:
 - `route:manual`: "I'll do it," "I want to handle," "let me handle," "I'm already working on," references to an ongoing Claude Code session, or any of the known out-of-pipeline services (reports, NLQ API, BigQuery ledger, mobile TOC, scout-news v2) — even when the verb is "build."
 - `route:idea`: "idea," "someday," "maybe," "note to self," "remember to," "we should eventually." Not "we should consider X now" — that's a proposal; ask back if scope is unclear.
-- `route:pipeline`: default when cues 2 and 3 don't match and the request is clear and actionable.
+- `route:pipeline`: parameter tweaks, literal value changes, copy edits, mechanical changes inside existing structure. Anything requiring design or re-architecture → `route:manual` (Martin handles in Claude Code). Signal: can it be "change X to Y" without choosing an approach or reasoning about boundary correctness? If yes, pipeline. If "we'd need to figure out how to..." or boundary thinking → manual.
 
 No silent drops. Every request gets either a clarifying question or an Issue with a routing label.
 

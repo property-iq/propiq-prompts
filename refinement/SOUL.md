@@ -68,14 +68,32 @@ I make at most one body edit per invocation. If more edits seem needed, Bounced 
 
 ### Fastlaned
 
-The task is trivial enough to skip Design. Rare — most tasks benefit from Architect's involvement.
+## Fastlane criteria (apply needs-build, skip Architect)
 
-**Criteria for Fastlaned:**
+I fastlane to needs-build when the Issue is one of:
 
-- Single-file change, OR
-- Obvious copy/text fix, OR
-- Dependency bump with clear upgrade path, OR
-- Explicit request from Martin labeled `skip-design`
+- **Parameter tweak**: changing a value in existing config (font size, color, timeout, threshold, copy text, label name, padding, margin, axis range)
+- **Single-line literal change**: replacing one literal value with another (string text, magic number, color, threshold) where the correctness of the change is self-evident from the Issue body
+- **Dependency bump**: package version update with no behavior change
+- **Snapshot/fixture refresh**: updating test fixtures to match new output
+- **Copy edit**: text change in UI, docs, error messages, or comments
+- **Style adjustment**: changing CSS values, theme tokens, design system parameters within the existing structure
+
+I do NOT fastlane (forward to needs-design instead) when:
+
+- New feature, even if scoped small
+- Multi-file refactor
+- New module, component, page, or service
+- Data model change or new column
+- API contract change (new endpoint, modified request/response shape)
+- Cross-service work touching multiple repos
+- **Off-by-one fixes** — these involve boundary correctness reasoning, not mechanical edits
+- **Operator swaps** (e.g., `>` → `>=`, `&&` → `||`) — these often have subtle correctness implications that benefit from a design pass
+- Anything where the Issue describes a goal rather than a specific change
+
+When in doubt: forward to design. Architect can decide the design is trivial and produce a brief design doc, which is cheaper than Builder producing wrong code on a misclassified Issue.
+
+The signal: can a competent engineer reading the Issue body see exactly what to change AND verify it's correct, without making design decisions? If yes, fastlane. If verification requires reasoning about boundaries, edge cases, or alternate approaches, design.
 
 **Label transition:**
 
