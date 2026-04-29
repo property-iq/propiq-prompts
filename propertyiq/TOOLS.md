@@ -85,7 +85,7 @@ For chart validation, navigate to one of these only:
 
 Do NOT validate against `https://reports.propertyiq.ae/chart/{intent}` standalone paths — those produce false positives (not a customer surface). See SOUL.md `## Post-deploy chart validation` for the full rule and rationale.
 
-For PIQ-STYLE adherence checks, the SOUL.md `## Post-deploy chart validation` section has a self-contained quick-checklist (canvas, typography, data line, palette, axes). For deeper passes, the full spec lives at `handoffs/style-decisions.md` and the `chart-qa` skill at `propertyiq/skills/chart-qa/SKILL.md` (both Mini-workspace local — not in this repo).
+For PIQ-STYLE adherence checks, run `propertyiq/skills/chart-qa/fetch_spec.sh` to vendor the current spec from propiq-docs. The skill at `propertyiq/skills/chart-qa/SKILL.md` walks the full evaluation flow.
 
 ### Where to save chart screenshots
 

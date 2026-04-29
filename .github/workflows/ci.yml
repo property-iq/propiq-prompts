@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quickref-fresh:
+    name: Check quickref is up-to-date with spec.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install pyyaml
+
+      - name: Regenerate quickref from spec.yaml
+        run: python scripts/regen_quickref.py > /tmp/expected-quickref.md
+
+      - name: Diff against committed quickref
+        run: |
+          diff -u propertyiq/skills/chart-qa/piq-style-quickref.md /tmp/expected-quickref.md || {
+            echo ""
+            echo "ERROR: piq-style-quickref.md is out of date."
+            echo "Run 'python scripts/regen_quickref.py > propertyiq/skills/chart-qa/piq-style-quickref.md' and commit."
+            exit 1
+          }
+
+  no-hardcoded-piq-values:
+    name: Reject hardcoded PIQ-STYLE values in prompts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: sudo apt-get install -y ripgrep
+
+      - name: Lint for hardcoded values
+        run: bash scripts/lint_no_hardcoded_values.sh

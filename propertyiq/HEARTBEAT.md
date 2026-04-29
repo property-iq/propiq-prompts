@@ -45,6 +45,8 @@ What to watch for:
 
 If any of these are elevated compared to the last heartbeat, mention in the status report.
 
+**P3.5. (chart-stack merges only) Refresh spec cache.** If P2 surfaced merges to chart-stack repos (`propiq-charts-img`, `propiq-charts-api`, `propiq-reports-web`, `propiq-charts-maps`), run `propertyiq/skills/chart-qa/fetch_spec.sh` to confirm the fetch path is healthy before the audit needs it. Skip on heartbeats with no chart-stack activity.
+
 **P4. Triage.** Based on what P1–P3 surfaced:
 
 - **Martin messaged with a build/decide/audit request** → evaluate using the four-outcomes decision tree in SOUL.md. File a GitHub Issue using the matching template (`.github/ISSUE_TEMPLATE/builder-task.md` for work, `audit-finding.md` for findings, `martin-direct.md` for decisions). Apply the appropriate routing label (`route:pipeline`, `route:manual`, or `route:idea`), plus `from:martin`, a priority (default `p2` unless Martin specified), and epic if obvious. The Refinement Routine will pick up `route:pipeline` Issues.
