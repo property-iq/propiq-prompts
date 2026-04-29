@@ -1,0 +1,66 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quickref-fresh:
+    name: Check quickref is up-to-date with spec.yaml
+    runs-on: ubuntu-latest
+    # Requires DOCS_PAT secret with read access to propiq-docs.
+    # Skips gracefully if the secret is not configured.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if DOCS_PAT is available
+        id: check-pat
+        run: |
+          if [ -n "${{ secrets.DOCS_PAT }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::DOCS_PAT secret not configured — skipping quickref freshness check. Set a PAT with read access to propiq-docs to enable this check."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check-pat.outputs.available == 'true'
+        with:
+          repository: property-iq/propiq-docs
+          path: propiq-docs
+          token: ${{ secrets.DOCS_PAT }}
+
+      - uses: actions/setup-python@v5
+        if: steps.check-pat.outputs.available == 'true'
+        with:
+          python-version: "3.11"
+
+      - run: pip install pyyaml
+        if: steps.check-pat.outputs.available == 'true'
+
+      - name: Regenerate quickref from spec.yaml
+        if: steps.check-pat.outputs.available == 'true'
+        run: python scripts/regen_quickref.py propiq-docs/charts/spec.yaml propiq-docs/tokens.yaml > /tmp/expected-quickref.md
+
+      - name: Diff against committed quickref
+        if: steps.check-pat.outputs.available == 'true'
+        run: |
+          diff -u propertyiq/skills/chart-qa/piq-style-quickref.md /tmp/expected-quickref.md || {
+            echo ""
+            echo "ERROR: piq-style-quickref.md is out of date."
+            echo "Run 'python scripts/regen_quickref.py <spec.yaml> <tokens.yaml> > propertyiq/skills/chart-qa/piq-style-quickref.md' and commit."
+            exit 1
+          }
+
+  no-hardcoded-piq-values:
+    name: Reject hardcoded PIQ-STYLE values in prompts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: sudo apt-get install -y ripgrep
+
+      - name: Lint for hardcoded values
+        run: bash scripts/lint_no_hardcoded_values.sh

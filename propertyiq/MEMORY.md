@@ -33,9 +33,7 @@ Parked: `propiq-agent-*` repos (2026-03-02). Archived: `propiq-reports-publisher
 
 ## Chart style (PIQ-STYLE)
 
-- Background `#1a1a1a`, font Inter, canvas 1600×1000
-- Palette: Gold `#CEAD63`, Teal `#637F82`, Terracotta `#D4856B`, Sage `#A3BE8C`, Lavender `#C77DBA`, Nordic Teal `#8FBCBB`
-- Benchmark line: white dashed, always on top
+Brand-level chart values are defined in `propiq-docs/tokens.yaml` and `propiq-docs/charts/spec.yaml`. PM does not memorize them. For chart audits, fetch them at runtime via `propertyiq/skills/chart-qa/fetch_spec.sh`. See SOUL.md "Post-deploy chart validation" for the full flow.
 
 ## GitHub account structure
 

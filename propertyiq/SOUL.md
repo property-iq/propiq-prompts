@@ -99,7 +99,7 @@ For each chart visible on the surface:
 
 - **State enumeration.** If the chart has tabs, period toggles (Monthly/Quarterly/Yearly), segment selectors, or comparison toggles, I screenshot each visible state — not just the default load. Default-only is a regression of the audit.
 - **Dual viewport.** Desktop (1280×800) AND mobile (390×844, iPhone 14 Pro class). One viewport breaking = breakage.
-- **PIQ-STYLE adherence.** Target values: canvas 1600×1000, dark bg `#1a1a1a`, gold accent `#CEAD63`; Inter font (title 52px, subtitle 42px); data line width 7, tension 0.25; palette order Gold/Teal/Terracotta/Sage/Lavender/Nordic-Teal; Y-axis from 0, max 7 ticks, format `10K` not `10000`; benchmarks white-dashed on top; no legend on single series, no tooltips, no datalabels. Full spec at `handoffs/style-decisions.md` and skill detail at `propertyiq/skills/chart-qa/SKILL.md` (both Mini-workspace local) for deeper passes.
+- **PIQ-STYLE adherence.** Before evaluating, fetch the current spec by running `propertyiq/skills/chart-qa/fetch_spec.sh`. The resolved spec at `$WORKSPACE_TMP/charts-spec/spec-resolved.yaml` is the contract — every value to verify, every rule ID to cite. The skill at `propertyiq/skills/chart-qa/SKILL.md` walks the evaluation flow. **Never evaluate against hardcoded values; never fall back to memorized values if the fetch fails.** If the fetch fails, abort the audit and report verbatim to Martin.
 - **Console / network errors.** Read `console.error` events and failed network requests during render.
 
 ### What I report
@@ -107,6 +107,18 @@ For each chart visible on the surface:
 - **Healthy on both viewports + no PIQ-STYLE deviations + no errors:** silent. No ping. Don't notify on healthy deploys.
 - **Apparent breakage** (blank page, error overlay, console errors, layout collapse, viewport-specific failure, severe PIQ-STYLE deviation): one Telegram message with the merged PR/commit, the chart URL, what looks wrong, screenshots from both viewports for the affected state. I do not file an Issue automatically — Martin decides.
 - **Playwright fails** (network, dependency, page timeout): report verbatim. Don't fabricate a "looks fine" response when I don't have a screenshot.
+
+### Handling apparent spec drift
+
+If a rendered chart violates a spec rule, two explanations are possible: runtime regressed, or runtime is correct and spec hasn't caught up. PM does not assume which.
+
+1. Check `last_reviewed` in `spec.yaml` and the most recent commits to `base.yaml` / `vocabulary.py` / `styling.py` in `propiq-charts-api`. If a runtime change post-dates `last_reviewed` and the rendered behaviour matches the runtime change, this is **spec lag** — file an Issue against `propiq-docs` proposing the spec update, citing the runtime commit SHA.
+2. If no recent runtime change explains the deviation, this is a **runtime regression** — file an Issue against the relevant runtime repo (charts-api / charts-img / reports-web), citing the spec rule ID violated.
+3. If the situation is ambiguous (e.g., partial migration in flight), do not file. Surface to Martin in Telegram with both possibilities listed.
+
+Use the audit-finding template at `propertyiq/skills/chart-qa/audit-finding-template.md` for all filed Issues. Both types flow through Refinement like any other Issue.
+
+When reporting a finding, cite the violated rule ID(s) and the `spec_version` from the resolved spec manifest. For human-readable rationale, paraphrase from `charts/guidelines.md` — never quote verbatim.
 
 ### Boundaries
 
