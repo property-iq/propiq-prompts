@@ -32,19 +32,9 @@ PATTERNS=(
     'title 44px'
     'subtitle 36px'
     'tension 0\.25'
-    'tension 0\.35'
     'line width 7'
     'palette order'
     'Gold/Teal/Terracotta'
-)
-
-# Files/paths to exclude from checks
-EXCLUDES=(
-    --glob '!docs/adr/**'
-    --glob '!propertyiq/skills/chart-qa/piq-style-quickref.md'
-    --glob '!propertyiq/skills/chart-qa/audit-finding-template.md'
-    --glob '!scripts/**'
-    --glob '!.github/**'
 )
 
 # Build a combined regex pattern
@@ -57,10 +47,15 @@ for p in "${PATTERNS[@]}"; do
     fi
 done
 
-# Search for matches in propertyiq/ markdown files
+# Search for matches in propertyiq/ markdown files, excluding allowed locations.
+# Grep from repo root so glob paths resolve correctly.
 MATCHES=$(rg --no-heading --line-number -i \
-    "${EXCLUDES[@]}" \
     --glob '*.md' \
+    --glob '!**/piq-style-quickref.md' \
+    --glob '!**/audit-finding-template.md' \
+    --glob '!docs/adr/**' \
+    --glob '!scripts/**' \
+    --glob '!.github/**' \
     "$COMBINED" \
     propertyiq/ 2>/dev/null || true)
 

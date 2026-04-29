@@ -12,6 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/checkout@v4
+        with:
+          repository: property-iq/propiq-docs
+          path: propiq-docs
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -19,14 +25,14 @@ jobs:
       - run: pip install pyyaml
 
       - name: Regenerate quickref from spec.yaml
-        run: python scripts/regen_quickref.py > /tmp/expected-quickref.md
+        run: python scripts/regen_quickref.py propiq-docs/charts/spec.yaml propiq-docs/tokens.yaml > /tmp/expected-quickref.md
 
       - name: Diff against committed quickref
         run: |
           diff -u propertyiq/skills/chart-qa/piq-style-quickref.md /tmp/expected-quickref.md || {
             echo ""
             echo "ERROR: piq-style-quickref.md is out of date."
-            echo "Run 'python scripts/regen_quickref.py > propertyiq/skills/chart-qa/piq-style-quickref.md' and commit."
+            echo "Run 'python scripts/regen_quickref.py <spec.yaml> <tokens.yaml> > propertyiq/skills/chart-qa/piq-style-quickref.md' and commit."
             exit 1
           }
 
