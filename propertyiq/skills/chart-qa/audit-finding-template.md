@@ -14,12 +14,16 @@ Use this template for the Issue body when filing a chart-audit finding. Every fi
 - `<rule_id>` — <paraphrase the rule from guidelines.md>
 - (additional rules if multiple)
 
+## Layer
+
+`<existence | layout | visual | style>` — populated from the `layer` field on the Violation when the audit ran via REST. Omit when the finding came from a screenshot-only Playwright evaluation (legacy path).
+
 ## Context
 
 - **Spec version:** <from spec-manifest.txt>
-- **Surface:** <url>
-- **Viewport:** <desktop / mobile / both>
-- **State:** <which tab/toggle was active>
+- **Surface:** <url, OR "REST audit" when no rendered surface>
+- **Viewport:** <desktop / mobile / both, OR "n/a" for REST audits>
+- **State:** <which tab/toggle was active, OR omit for REST audits>
 
 ## Evidence
 

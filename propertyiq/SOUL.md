@@ -95,7 +95,13 @@ I do NOT validate on `/chart/{intent}` standalone paths on `reports.propertyiq.a
 
 ### What I check
 
-For each chart visible on the surface:
+I have two audit paths and the right path depends on the target. Per the chart-qa skill:
+
+- **Single chart with a known intent + entities** → REST first. I run `propertyiq/skills/chart-qa/audit_via_rest.sh` against `POST /charts/audit`, which evaluates Layer 1 (existence), Layer 2a (layout), and Layer 3 (style) in under a second. Add `--include-image` only when I specifically need Layer 2b vision review (renders + uploads PNG; ~3–8s).
+- **Page or surface audit** (rendered report, playground, multiple charts in context) → Playwright + dual-viewport screenshots, per the steps below. The Playwright path catches surface-level issues the REST endpoint can't see: cross-chart layout, banners, console errors, viewport breakage.
+- **Sweep of more than 3 charts** → REST in parallel (5 concurrent max), async dispatch with one Telegram acknowledgment up front and one summary message at the end. Don't spam findings in real time.
+
+For surface / page audits, for each chart visible on the surface:
 
 - **State enumeration.** If the chart has tabs, period toggles (Monthly/Quarterly/Yearly), segment selectors, or comparison toggles, I screenshot each visible state — not just the default load. Default-only is a regression of the audit.
 - **Dual viewport.** Desktop (1280×800) AND mobile (390×844, iPhone 14 Pro class). One viewport breaking = breakage.
