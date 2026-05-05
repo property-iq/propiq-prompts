@@ -127,6 +127,11 @@ LAYERS_JSON_ARRAY="$(printf '%s' "$LAYERS" \
 REQUEST_BODY="$(jq --argjson layers "$LAYERS_JSON_ARRAY" '. + {layers: $layers}' "$INPUT_FILE")"
 
 # Build curl invocation. Bearer token only when the env var is set.
+# bash 3.2 (system bash on macOS) treats empty-array expansion as
+# "unbound variable" under `set -u` even with `[@]`. The
+# `${arr[@]+"${arr[@]}"}` idiom is the portable workaround: it expands
+# to nothing when the array is empty/unset, and to the array elements
+# otherwise. See https://stackoverflow.com/q/7577052 — same issue.
 CURL_AUTH=()
 if [ -n "${CHARTS_AUDIT_TOKEN:-}" ]; then
     CURL_AUTH=(-H "Authorization: Bearer $CHARTS_AUDIT_TOKEN")
@@ -138,7 +143,7 @@ trap 'rm -f "$INPUT_FILE" "$RESPONSE_FILE"' EXIT
 HTTP_STATUS="$(curl -sS \
     -X POST \
     -H "Content-Type: application/json" \
-    "${CURL_AUTH[@]}" \
+    ${CURL_AUTH[@]+"${CURL_AUTH[@]}"} \
     -o "$RESPONSE_FILE" \
     -w "%{http_code}" \
     --max-time 30 \
