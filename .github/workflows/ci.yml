@@ -64,3 +64,22 @@ jobs:
 
       - name: Lint for hardcoded values
         run: bash scripts/lint_no_hardcoded_values.sh
+
+  shellcheck:
+    name: ShellCheck on skill helpers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: ShellCheck on chart-qa helpers
+        run: |
+          # Per Tranche A.5 of the chart-qa signal-restoration plan
+          # (working/design/propiq-charts-api_2026-05-04_chart-qa-signal-restoration.md):
+          # the audit_via_rest.sh helper crashed under `set -u` on bash 3.2
+          # when CHARTS_AUDIT_TOKEN was unset (empty-array expansion).
+          # Run shellcheck on every shell helper to catch this class of bug.
+          find propertyiq/skills -name '*.sh' -print0 \
+            | xargs -0 -r shellcheck --severity=warning
