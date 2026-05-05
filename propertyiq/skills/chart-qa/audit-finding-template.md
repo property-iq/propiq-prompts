@@ -18,6 +18,12 @@ Use this template for the Issue body when filing a chart-audit finding. Every fi
 
 `<existence | layout | visual | style>` — populated from the `layer` field on the Violation when the audit ran via REST. Omit when the finding came from a screenshot-only Playwright evaluation (legacy path).
 
+## Audit summary
+
+- **Error count:** `<error_count>` — populated from `AuditResult.error_count` (Tranche A.4 step 1). Read this for blocking decisions; the deprecated `passed` flag is no longer load-bearing in this template.
+- **Warning count:** `<warning_count>` — informational; warnings annotate but do not block.
+- **Severity breakdown:** `<severity_breakdown>` — per-severity counts including info-level (e.g. `{"error": 0, "warning": 2, "info": 0}`). Surface this when relevant for triage.
+
 ## Context
 
 - **Spec version:** <from spec-manifest.txt>

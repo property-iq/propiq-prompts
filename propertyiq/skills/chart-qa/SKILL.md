@@ -46,7 +46,7 @@ echo '{"render_request": {...}}' \
        --output "$WORKSPACE_TMP/audit_result.json"
 ```
 
-The script's output is the `AuditResult` JSON: `passed`, `violations[]`, `summary`, `audit_coverage`. Each violation carries a `layer` field (`existence` / `layout` / `style` / `visual`). Exit 0 iff `passed: true`.
+The script's output is the `AuditResult` JSON: `error_count`, `warning_count`, `severity_breakdown`, `violations[]`, `summary`, `audit_coverage`, plus the deprecated `passed` field for backward compat. Each violation carries a `layer` field (`existence` / `layout` / `style` / `visual`). **Exit 0 iff `error_count == 0`** (no error-severity findings); warnings do not change the exit code. The `passed` field is deprecated — read `error_count` directly when you need the gate.
 
 If the chart isn't already rendered (you have a `ChartRequest` rather than a `chart_response.config`), pass `render_request` and the API renders + audits in one round-trip.
 
