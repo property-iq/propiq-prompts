@@ -31,9 +31,10 @@
 #            even on non-zero exit, so the caller can introspect violations).
 #   stderr — diagnostic messages.
 #
-# Exit codes:
-#   0 — audit completed and passed:true (zero error-severity violations).
-#   1 — audit completed but passed:false (violations present).
+# Exit codes (per Tranche A.4 step 2 — derived from error_count):
+#   0 — audit completed with error_count == 0 (no error-severity violations).
+#       Warnings and info-level findings do NOT change the exit code.
+#   1 — audit completed with error_count > 0 (errors present).
 #   2 — request failed (HTTP error, bad input, network failure).
 #
 # Auth:
@@ -172,7 +173,24 @@ if [ -n "$OUTPUT_PATH" ]; then
     cp "$RESPONSE_FILE" "$OUTPUT_PATH"
 fi
 
-# Exit 0 iff passed:true. Anything else (including missing field) → 1.
+# Per Tranche A.4 step 2 of the chart-qa signal-restoration plan: exit
+# code derives from `error_count` rather than the deprecated `passed`
+# field. Behavior unchanged on the wire — charts-api A.4 step 1
+# (PR #297) ensures `passed == (error_count == 0)` by construction.
+# Fallback to `passed` handles older charts-api revisions and test
+# fixtures that haven't migrated yet; the fallback is removed in step 3.
+#
+# Exit codes:
+#   0 → error_count == 0 (no error-severity violations)
+#   1 → error_count > 0 (audit completed but errors present)
+ERROR_COUNT="$(jq -r '.error_count // empty' "$RESPONSE_FILE")"
+if [ -n "$ERROR_COUNT" ]; then
+    if [ "$ERROR_COUNT" = "0" ]; then
+        exit 0
+    fi
+    exit 1
+fi
+# Backward compat — older charts-api or test mocks without error_count.
 PASSED="$(jq -r '.passed // false' "$RESPONSE_FILE")"
 if [ "$PASSED" = "true" ]; then
     exit 0
