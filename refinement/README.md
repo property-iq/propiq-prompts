@@ -1,3 +1,7 @@
+> ⚠️ **RETIRED (2026-06/07)** — this Routine profile is no longer invoked. The
+> routed pipeline was replaced by `/spec` + the overnight-builder (see the
+> repo README). Kept for reference only.
+
 # Refinement Routine
 
 Second pipeline stage. Gates every Issue before Design or Build.

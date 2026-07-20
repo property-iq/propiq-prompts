@@ -1,3 +1,7 @@
+> ⚠️ **RETIRED (2026-06/07)** — this Routine profile is no longer invoked. The
+> routed pipeline was replaced by `/spec` + the overnight-builder (see the
+> repo README). Kept for reference only.
+
 # Builder Routine
 
 Third pipeline stage. Writes code to resolve Issues labeled `needs-build` (fast-lane) or `design-ready` (post-Architect).
