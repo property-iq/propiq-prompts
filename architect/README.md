@@ -1,3 +1,7 @@
+> ⚠️ **RETIRED (2026-06/07)** — this Routine profile is no longer invoked. The
+> routed pipeline was replaced by `/spec` + the overnight-builder (see the
+> repo README). Kept for reference only.
+
 # Architect Routine
 
 Third pipeline stage. Produces design documents for Issues Refinement routed to `needs-design`.
